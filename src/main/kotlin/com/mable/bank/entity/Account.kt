@@ -1,5 +1,6 @@
 package com.mable.bank.entity
 
+import com.mable.bank.dto.AccountBalanceDto
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -19,4 +20,8 @@ class Account(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     val id: Long? = null
+
+    companion object {
+        fun fromDto(dto: AccountBalanceDto) = Account(dto.accountId.toLong(), dto.balance)
+    }
 }

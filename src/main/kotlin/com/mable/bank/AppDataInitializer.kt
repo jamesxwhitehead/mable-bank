@@ -1,5 +1,6 @@
 package com.mable.bank
 
+import com.mable.bank.dto.AccountBalanceDto
 import com.mable.bank.entity.Account
 import com.mable.bank.entity.Transaction
 import com.mable.bank.repository.AccountRepository
@@ -9,11 +10,13 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.core.io.ClassPathResource
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.validation.Validator
 
 @Component
 class AppDataInitializer(
     private val accountRepository: AccountRepository,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val validator: Validator
 ) : ApplicationRunner {
     @Transactional
     override fun run(args: ApplicationArguments) {
@@ -26,8 +29,17 @@ class AppDataInitializer(
 
         file.forEachLine {
             val (accountId, balance) = it.split(COMMA_DELIMITER)
+            val dto = AccountBalanceDto(accountId, balance.toBigDecimal())
 
-            val account = Account(accountId.toLong(), balance.toBigDecimal())
+            val violations = validator.validateObject(dto)
+
+            if (violations.hasErrors()) {
+                return@forEachLine
+            }
+
+            val account = accountRepository.findByAccountId(dto.accountId.toLong())
+                ?.apply { this.balance = dto.balance }
+                ?: Account.fromDto(dto)
 
             accountRepository.save(account)
         }
