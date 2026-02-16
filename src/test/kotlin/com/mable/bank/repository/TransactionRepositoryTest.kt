@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 class TransactionRepositoryTest(@Autowired private val transactionRepository: TransactionRepository) {
     @Test
     fun findAllByStateOrderByCreatedAtAsc() {
-        val transactions = transactionRepository.findAllByStateOrderByCreatedAtAsc(TransactionState.PROCESSED)
+        val transactions = transactionRepository.findAllByStateOrderByCreatedAtAsc(TransactionState.PENDING)
 
         assertThat(transactions)
             .hasSize(4)
