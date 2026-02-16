@@ -21,6 +21,17 @@ class Account(
     @Column(nullable = false)
     val id: Long? = null
 
+    @Throws(IllegalStateException::class)
+    fun withdraw(amount: BigDecimal) {
+        check(balance >= amount)
+
+        balance -= amount
+    }
+
+    fun deposit(amount: BigDecimal) {
+        balance += amount
+    }
+
     companion object {
         fun fromDto(dto: AccountBalanceDto) = Account(dto.accountId.toLong(), dto.balance)
     }

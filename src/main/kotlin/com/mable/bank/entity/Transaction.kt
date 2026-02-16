@@ -8,7 +8,9 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.ManyToOne
+import org.hibernate.annotations.CreationTimestamp
 import java.math.BigDecimal
+import java.time.Instant
 
 @Entity
 class Transaction(
@@ -25,6 +27,10 @@ class Transaction(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
     val id: Long? = null
+
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    val createdAt: Instant? = null
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
