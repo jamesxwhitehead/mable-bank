@@ -2,9 +2,8 @@ package com.mable.bank
 
 import com.mable.bank.dto.AccountBalanceDto
 import com.mable.bank.entity.Account
-import com.mable.bank.entity.Transaction
 import com.mable.bank.repository.AccountRepository
-import com.mable.bank.repository.TransactionRepository
+import com.mable.bank.service.TransactionManager
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.core.io.ClassPathResource
@@ -15,7 +14,7 @@ import org.springframework.validation.Validator
 @Component
 class AppDataInitializer(
     private val accountRepository: AccountRepository,
-    private val transactionRepository: TransactionRepository,
+    private val transactionManager: TransactionManager,
     private val validator: Validator
 ) : ApplicationRunner {
     @Transactional
@@ -28,7 +27,7 @@ class AppDataInitializer(
         val file = ClassPathResource("mable_account_balances.csv").file
 
         file.forEachLine {
-            val (accountId, balance) = it.split(COMMA_DELIMITER)
+            val (accountId, balance) = it.split(CSV_DELIMITER)
             val dto = AccountBalanceDto(accountId, balance.toBigDecimal())
 
             val violations = validator.validateObject(dto)
@@ -48,23 +47,10 @@ class AppDataInitializer(
     }
 
     private fun loadTransactions() {
-        val file = ClassPathResource("mable_transactions.csv").file
-
-        file.forEachLine {
-            val (senderAccountId, receiverAccountId, amount) = it.split(COMMA_DELIMITER)
-
-            val sender = accountRepository.findByAccountId(senderAccountId.toLong())!!
-            val receiver = accountRepository.findByAccountId(receiverAccountId.toLong())!!
-
-            val transaction = Transaction(sender, receiver, amount.toBigDecimal())
-
-            transactionRepository.save(transaction)
-        }
-
-        transactionRepository.flush()
+        transactionManager.createPendingTransactionQueue(ClassPathResource("mable_transactions.csv"))
     }
 
-    companion object {
-        const val COMMA_DELIMITER = ","
+    private companion object {
+        const val CSV_DELIMITER = ","
     }
 }

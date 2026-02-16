@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 
 @RestController
 @RequestMapping("/transactions")
@@ -33,7 +34,7 @@ class TransactionController(
         val path = uploadDir.resolve(file.originalFilename!!)
 
         file.inputStream.use {
-            Files.copy(it, path)
+            Files.copy(it, path, StandardCopyOption.REPLACE_EXISTING)
         }
 
         val event = TransactionFileUploadedEvent(path)
