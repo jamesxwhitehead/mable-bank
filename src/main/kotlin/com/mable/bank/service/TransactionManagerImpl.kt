@@ -51,8 +51,17 @@ class TransactionManagerImpl(
             require(senderAccountId != receiverAccountId) { "Sender and receiver accounts cannot be the same." }
             require(amount > BigDecimal.ZERO) { "Amount must be positive." }
 
-            val sender = accountRepository.findByAccountId(senderAccountId) ?: return null
-            val receiver = accountRepository.findByAccountId(receiverAccountId) ?: return null
+            val sender = accountRepository.findByAccountId(senderAccountId) ?: run {
+                logger.warn("Skipping line: sender account {} not found.", senderAccountId)
+
+                return null
+            }
+
+            val receiver = accountRepository.findByAccountId(receiverAccountId) ?: run {
+                logger.warn("Skipping line: receiver account {} not found.", receiverAccountId)
+
+                return null
+            }
 
             Transaction(sender, receiver, amount)
         }.getOrElse { exception ->

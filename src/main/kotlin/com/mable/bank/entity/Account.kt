@@ -14,7 +14,7 @@ class Account(
     val accountId: Long,
 
     @Column(nullable = false)
-    var balance: BigDecimal = BigDecimal.ZERO
+    var balance: BigDecimal = BigDecimal.ZERO.setScale(2)
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +23,9 @@ class Account(
 
     @Throws(IllegalStateException::class)
     fun withdraw(amount: BigDecimal) {
-        check(balance >= amount)
+        check(balance >= amount) {
+            "Insufficient funds: account $accountId has balance $balance, attempted withdrawal of $amount."
+        }
 
         balance -= amount
     }

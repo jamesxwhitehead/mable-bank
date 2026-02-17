@@ -22,8 +22,8 @@ class TransactionProcessorImpl(private val transactionRepository: TransactionRep
     }
 
     @Scheduled(
-        fixedDelay = 60,
-        initialDelay = 60,
+        fixedDelay = 30,
+        initialDelay = 30,
         timeUnit = TimeUnit.SECONDS
     )
     @Transactional
