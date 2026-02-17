@@ -3,6 +3,7 @@ package com.mable.bank.service
 import com.mable.bank.entity.Transaction
 import com.mable.bank.repository.AccountRepository
 import com.mable.bank.repository.TransactionRepository
+import org.slf4j.LoggerFactory
 import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,22 +17,19 @@ class TransactionManagerImpl(
 ) : TransactionManager {
     @Transactional
     override fun createPendingTransactionQueue(resource: Resource) {
-        createPendingTransactionQueueFromFile(resource.file)
+        createPendingTransactionQueue(resource.file)
     }
 
     @Transactional
     override fun createPendingTransactionQueue(path: Path) {
-        createPendingTransactionQueueFromFile(path.toFile())
+        createPendingTransactionQueue(path.toFile())
     }
 
-    private fun createPendingTransactionQueueFromFile(file: File) {
-        file.forEachLine {
-            val (senderAccountId, receiverAccountId, amount) = it.split(CSV_DELIMITER, limit = 3)
+    private fun createPendingTransactionQueue(file: File) {
+        file.forEachLine { line ->
+            if (line.isBlank()) return@forEachLine
 
-            val sender = accountRepository.findByAccountId(senderAccountId.toLong())!!
-            val receiver = accountRepository.findByAccountId(receiverAccountId.toLong())!!
-
-            val transaction = Transaction(sender, receiver, amount.toBigDecimal())
+            val transaction = parseTransactionOrNull(line) ?: return@forEachLine
 
             transactionRepository.save(transaction)
         }
@@ -39,7 +37,28 @@ class TransactionManagerImpl(
         transactionRepository.flush()
     }
 
-    private companion object {
-        const val CSV_DELIMITER = ","
+    private fun parseTransactionOrNull(line: String): Transaction? {
+        return runCatching {
+            val parts = line.split(CSV_DELIMITER, limit = 3)
+
+            if (parts.size != 3) return null
+
+            val senderAccountId = parts[0].trim().toLong()
+            val receiverAccountId = parts[1].trim().toLong()
+            val amount = parts[2].trim().toBigDecimal()
+
+            val sender = accountRepository.findByAccountId(senderAccountId) ?: return null
+            val receiver = accountRepository.findByAccountId(receiverAccountId) ?: return null
+
+            Transaction(sender, receiver, amount)
+        }.getOrElse { exception ->
+            logger.warn("Skipping malformed line: {}", line, exception)
+            null
+        }
+    }
+
+    companion object {
+        private const val CSV_DELIMITER = ","
+        private val logger = LoggerFactory.getLogger(TransactionManagerImpl::class.java)
     }
 }
