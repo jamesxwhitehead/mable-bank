@@ -27,7 +27,7 @@ class TransactionProcessorImpl(private val transactionRepository: TransactionRep
         timeUnit = TimeUnit.SECONDS
     )
     @Transactional
-    override fun processPendingTransactions() {
+    override fun processPendingTransactionQueue() {
         if (!appReady.load()) return
 
         val transactions = transactionRepository.findAllByStateOrderByCreatedAtAsc(TransactionState.PENDING)

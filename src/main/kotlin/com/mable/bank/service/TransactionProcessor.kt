@@ -1,5 +1,5 @@
 package com.mable.bank.service
 
 interface TransactionProcessor {
-    fun processPendingTransactions()
+    fun processPendingTransactionQueue()
 }

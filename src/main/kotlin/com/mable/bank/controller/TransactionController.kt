@@ -30,14 +30,24 @@ class TransactionController(
 
     @PostMapping("/upload", consumes = ["multipart/form-data"])
     fun upload(@RequestParam("file") file: MultipartFile): ResponseEntity<Unit> {
+        if (file.isEmpty) {
+            return ResponseEntity.badRequest().build()
+        }
+
         val uploadDir = Paths.get("src/main/resources/static/upload")
-        val path = uploadDir.resolve(file.originalFilename!!)
+
+        val sanitized = file.originalFilename
+            ?.let { Paths.get(it).fileName.toString() }
+            ?: "upload_${System.currentTimeMillis()}.csv"
+
+        val path = uploadDir.resolve(sanitized)
 
         file.inputStream.use {
             Files.copy(it, path, StandardCopyOption.REPLACE_EXISTING)
         }
 
         val event = TransactionFileUploadedEvent(path)
+
         eventPublisher.publishEvent(event)
 
         return ResponseEntity.accepted().build()
