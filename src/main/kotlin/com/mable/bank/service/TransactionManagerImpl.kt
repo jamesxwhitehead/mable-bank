@@ -8,6 +8,7 @@ import org.springframework.core.io.Resource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.io.File
+import java.math.BigDecimal
 import java.nio.file.Path
 
 @Service
@@ -46,6 +47,9 @@ class TransactionManagerImpl(
             val senderAccountId = parts[0].trim().toLong()
             val receiverAccountId = parts[1].trim().toLong()
             val amount = parts[2].trim().toBigDecimal()
+
+            require(senderAccountId != receiverAccountId) { "Sender and receiver accounts cannot be the same." }
+            require(amount > BigDecimal.ZERO) { "Amount must be positive." }
 
             val sender = accountRepository.findByAccountId(senderAccountId) ?: return null
             val receiver = accountRepository.findByAccountId(receiverAccountId) ?: return null
