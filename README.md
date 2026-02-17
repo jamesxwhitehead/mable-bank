@@ -104,6 +104,14 @@ Using JPA repositories + H2 means the system is not just an in-memory script:
 
 ---
 
+## OpenAPI / API discovery
+
+The project includes **SpringDoc OpenAPI** support, making it easy for reviewers to discover and exercise the API via generated documentation/UI once the app is running.
+
+(Typically `http://localhost:8080/swagger-ui/index.html`)
+
+---
+
 ## Running locally
 
 ### Prerequisites
