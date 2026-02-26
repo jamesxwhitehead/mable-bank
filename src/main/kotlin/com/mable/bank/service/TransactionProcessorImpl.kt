@@ -33,14 +33,12 @@ class TransactionProcessorImpl(private val transactionRepository: TransactionRep
         if (!appReady.load()) return
 
         val transactions = transactionRepository.findAllByStateOrderByCreatedAtAsc(TransactionState.PENDING)
+            .ifEmpty { return }
 
         for (transaction in transactions) {
-            val sender = transaction.sender
-            val receiver = transaction.receiver
-
             try {
-                sender.withdraw(transaction.amount)
-                receiver.deposit(transaction.amount)
+                transaction.sender.withdraw(transaction.amount)
+                transaction.receiver.deposit(transaction.amount)
                 transaction.approve()
             } catch (exception: InsufficientFundsException) {
                 logger.warn(exception.message)
