@@ -1,7 +1,9 @@
 package com.mable.bank.service
 
 import com.mable.bank.entity.TransactionState
+import com.mable.bank.exception.InsufficientFundsException
 import com.mable.bank.repository.TransactionRepository
+import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Scheduled
@@ -39,15 +41,20 @@ class TransactionProcessorImpl(private val transactionRepository: TransactionRep
             try {
                 sender.withdraw(transaction.amount)
                 receiver.deposit(transaction.amount)
+                transaction.approve()
+            } catch (exception: InsufficientFundsException) {
+                logger.warn(exception.message)
 
-                transaction.state = TransactionState.PROCESSED
-            } catch (_: IllegalStateException) {
-                transaction.state = TransactionState.DISHONOURED
+                transaction.decline()
             }
 
             transactionRepository.save(transaction)
         }
 
         transactionRepository.flush()
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(TransactionProcessorImpl::class.java)
     }
 }

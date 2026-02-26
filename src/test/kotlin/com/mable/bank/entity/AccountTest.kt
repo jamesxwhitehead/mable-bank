@@ -1,5 +1,6 @@
 package com.mable.bank.entity
 
+import com.mable.bank.exception.InsufficientFundsException
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -15,10 +16,10 @@ class AccountTest {
     }
 
     @Test
-    fun withdrawShouldThrowIllegalStateExceptionWhenBalanceIsInsufficient() {
+    fun withdrawShouldThrowInsufficientFundsExceptionWhenBalanceIsInsufficient() {
         val account = Account(1000000000000001, 5000.toBigDecimal())
 
-        assertThrows<IllegalStateException> { account.withdraw(6000.toBigDecimal()) }
+        assertThrows<InsufficientFundsException> { account.withdraw(6000.toBigDecimal()) }
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.mable.bank.entity
 
 import com.mable.bank.dto.AccountBalanceDto
+import com.mable.bank.exception.InsufficientFundsException
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -21,10 +22,10 @@ class Account(
     @Column(nullable = false)
     val id: Long? = null
 
-    @Throws(IllegalStateException::class)
+    @Throws(InsufficientFundsException::class)
     fun withdraw(amount: BigDecimal) {
-        check(balance >= amount) {
-            "Insufficient funds: account $accountId has balance $balance, attempted withdrawal of $amount."
+        if (balance < amount) {
+            throw InsufficientFundsException("Insufficient funds: account $accountId has balance $balance, attempted withdrawal of $amount.")
         }
 
         balance -= amount

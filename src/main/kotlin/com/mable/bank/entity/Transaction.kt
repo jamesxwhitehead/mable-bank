@@ -28,11 +28,32 @@ class Transaction(
     @Column(nullable = false)
     val id: Long? = null
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    var state: TransactionState = TransactionState.PENDING
+        protected set
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    var reason: Reason? = null
+        protected set
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     val createdAt: Instant? = null
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    var state: TransactionState = TransactionState.PENDING
+    @Column
+    var settledAt: Instant? = null
+        protected set
+
+    fun approve() {
+        state = TransactionState.SETTLED
+        reason = Reason.APPROVED
+        settledAt = Instant.now()
+    }
+
+    fun decline() {
+        state = TransactionState.DISHONOURED
+        reason = Reason.INSUFFICIENT_FUNDS
+    }
 }
