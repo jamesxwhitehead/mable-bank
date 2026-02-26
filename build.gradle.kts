@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.springframework.boot)
     alias(libs.plugins.spring.dependency.management)
     alias(libs.plugins.kotlin.plugin.jpa)
+    id("java-test-fixtures")
 }
 
 group = "com.mable"
