@@ -2,9 +2,11 @@
 kotlin = "2.2.21"
 springframework-boot = "4.0.2"
 spring-dependency-management = "1.1.7"
+datafaker = "2.5.4"
 springdoc-openapi = "3.0.1"
 
 [libraries]
+datafaker = { module = "net.datafaker:datafaker", version.ref = "datafaker" }
 springdoc-openapi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc-openapi" }
 
 [plugins]
